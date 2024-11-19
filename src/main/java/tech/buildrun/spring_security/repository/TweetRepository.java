@@ -7,5 +7,4 @@ import tech.buildrun.spring_security.entities.Tweet;
 
 @Repository
 public interface TweetRepository extends JpaRepository<Tweet, Long> {
-
 }
