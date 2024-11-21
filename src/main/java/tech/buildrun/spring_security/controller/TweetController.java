@@ -12,7 +12,6 @@ import tech.buildrun.spring_security.entities.Tweet;
 import tech.buildrun.spring_security.repository.TweetRepository;
 import tech.buildrun.spring_security.repository.UserRepository;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;

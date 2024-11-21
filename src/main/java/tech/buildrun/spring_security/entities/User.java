@@ -16,7 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import tech.buildrun.spring_security.controller.dto.LoginRequest;
@@ -34,6 +33,9 @@ public class User {
 
     @Column(unique = true)
     private String username;
+
+    @Column(unique = true)
+    private String userEmail;
 
     private String password;
 

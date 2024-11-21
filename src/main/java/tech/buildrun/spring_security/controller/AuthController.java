@@ -1,40 +1,46 @@
 package tech.buildrun.spring_security.controller;
 
-import java.time.Instant;
-import java.util.stream.Collectors;
-
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import tech.buildrun.spring_security.controller.dto.CreateUserRequest;
 import tech.buildrun.spring_security.controller.dto.LoginRequest;
 import tech.buildrun.spring_security.controller.dto.LoginResponse;
 import tech.buildrun.spring_security.entities.Role;
+import tech.buildrun.spring_security.entities.User;
+import tech.buildrun.spring_security.repository.RoleRepository;
 import tech.buildrun.spring_security.repository.UserRepository;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
-public class TokenController {
+@RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:4200")
+public class AuthController {
 
     private final JwtEncoder encoder;
-    private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
 
-        var user = userRepository.findByUsername(request.username());
+        var user = userRepository.findByUserEmail(request.email());
 
         if (user.isEmpty() || !user.get().isLoginCorrect(request, bCryptPasswordEncoder)) {
-            throw new BadCredentialsException("User or Password invalid");
+            throw new BadCredentialsException("User email or password invalid");
         }
 
         var now = Instant.now();
@@ -58,4 +64,25 @@ public class TokenController {
         return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
     }
 
+    @PostMapping("/users")
+    @Transactional
+    public ResponseEntity<Void> newUser(@RequestBody CreateUserRequest request) {
+
+        var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
+
+        var user = userRepository.findByUserEmail(request.email());
+
+        if (user.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        var newUser = new User();
+        newUser.setUserEmail(request.email());
+        newUser.setPassword(bCryptPasswordEncoder.encode(request.password()));
+        newUser.setRoles(Set.of(basicRole));
+
+        userRepository.save(newUser);
+
+        return ResponseEntity.ok().build();
+    }
 }
