@@ -63,7 +63,7 @@ public class AuthController {
 
         var jwtValue = encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
-        return ResponseEntity.ok(new LoginResponse(jwtValue, expiresIn));
+        return ResponseEntity.ok(new LoginResponse(jwtValue, user.get().getUsername(), expiresIn));
     }
 
     @PostMapping("/users")
