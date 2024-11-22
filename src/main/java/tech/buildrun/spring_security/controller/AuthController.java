@@ -66,7 +66,7 @@ public class AuthController {
         return ResponseEntity.ok(new LoginResponse(jwtValue, user.get().getUsername(), expiresIn));
     }
 
-    @PostMapping("/users")
+    @PostMapping("/create")
     @Transactional
     public ResponseEntity<Void> newUser(@RequestBody CreateUserRequest request) {
 
@@ -79,6 +79,7 @@ public class AuthController {
         }
 
         var newUser = new User();
+        newUser.setUsername(request.username());
         newUser.setUserEmail(request.email());
         newUser.setPassword(bCryptPasswordEncoder.encode(request.password()));
         newUser.setRoles(Set.of(basicRole));
