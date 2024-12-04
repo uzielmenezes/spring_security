@@ -1,9 +1,13 @@
 package tech.buildrun.spring_security.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import tech.buildrun.spring_security.controller.dto.CreateTweetRequest;
 import tech.buildrun.spring_security.controller.dto.FeedItemResponse;
 import tech.buildrun.spring_security.controller.dto.FeedResponse;
@@ -14,20 +18,9 @@ import tech.buildrun.spring_security.repository.UserRepository;
 
 import java.util.UUID;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.GetMapping;
-
 @RestController
 @AllArgsConstructor
+@RequestMapping("/tweet")
 public class TweetController {
 
     private final TweetRepository tweetRepository;
@@ -35,7 +28,7 @@ public class TweetController {
 
     @GetMapping("/feed")
     public ResponseEntity<FeedResponse> getFeed(@RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+                                                @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
         var tweets = tweetRepository.findAll(PageRequest.of(page, pageSize, Sort.Direction.DESC, "creationTimestamp"))
                 .map(tweet -> new FeedItemResponse(tweet.getTweetId(), tweet.getContent(),
@@ -45,14 +38,14 @@ public class TweetController {
                 tweets.getTotalElements()));
     }
 
-    @PostMapping("/tweets")
+    @PostMapping("/create")
     public ResponseEntity<Void> createTweet(@RequestBody CreateTweetRequest request,
-            JwtAuthenticationToken token) {
+                                            JwtAuthenticationToken token) {
 
-        var user = userRepository.findById(UUID.fromString(token.getName()));
+        var user = userRepository.findById(UUID.fromString(token.getName())).orElseThrow(() -> new RuntimeException("User not Found"));
 
         var tweet = new Tweet();
-        tweet.setUser(user.get());
+        tweet.setUser(user);
         tweet.setContent(request.content());
 
         tweetRepository.save(tweet);
@@ -60,7 +53,7 @@ public class TweetController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/tweets/{id}")
+    @DeleteMapping("/create/{id}")
     public ResponseEntity<Void> deleteTweet(@PathVariable("id") Long tweetId, JwtAuthenticationToken token) {
 
         var user = userRepository.findById(UUID.fromString(token.getName()));
