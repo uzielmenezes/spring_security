@@ -1,28 +1,21 @@
 package tech.buildrun.spring_security.entities;
 
-import java.util.Set;
-import java.util.UUID;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import tech.buildrun.spring_security.controller.dto.LoginRequest;
+
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tb_users")
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class User {
 
