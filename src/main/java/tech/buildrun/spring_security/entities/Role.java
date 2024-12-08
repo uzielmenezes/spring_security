@@ -1,10 +1,7 @@
 package tech.buildrun.spring_security.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "tb_roles")
@@ -21,21 +18,19 @@ public class Role {
 
     private String name;
 
+    @Getter
     public enum Values {
 
         ADMIN(1L),
 
         BASIC(2L);
 
-        Long roleId;
+        final Long roleId;
 
         Values(Long roleId) {
             this.roleId = roleId;
         }
 
-        public Long getRoleId() {
-            return roleId;
-        }
     }
 
 }
